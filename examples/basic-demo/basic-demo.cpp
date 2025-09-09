@@ -21,7 +21,6 @@ void usbpdCableAttached(void)
 void usbpdCableDetached(void)
 {
   Serial.println("cable detached");
-}
 
 void usbpdCapabilitiesReceived(void)
 {

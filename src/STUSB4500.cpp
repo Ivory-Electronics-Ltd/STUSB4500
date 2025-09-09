@@ -90,7 +90,7 @@ static void _attachISR(void) { _usbpd->attachISR(); }
 STUSB4500::STUSB4500(
     uint16_t const resetPin,
     uint8_t const slaveAddress,
-    TwoWire const *wire
+    TwoWire *wire
 ):
   _resetPin(resetPin),
   _slaveAddress(slaveAddress),
@@ -128,10 +128,6 @@ bool STUSB4500::begin(uint16_t const alertPin, uint16_t const attachPin)
     attachInterrupt(digitalPinToInterrupt(alertPin), _alertISR, FALLING);
     attachInterrupt(digitalPinToInterrupt(attachPin), _attachISR, CHANGE);
 
-    // initialize I2C interface
-    TwoWire *wire = (TwoWire *)_wire;
-    wire->begin();
-    wire->setClock(I2C_CLOCK_FREQ_HZ);
   }
 
   _started = false;
@@ -463,14 +459,15 @@ bool STUSB4500::wireRead(
   uint8_t buff_sz = (uint8_t)(size & 0xFF);
   size_t count;
 
-  TwoWire *wire = (TwoWire *)_wire;
+  //TwoWire *wire = (TwoWire *)_wire;
 
-  wire->beginTransmission(_slaveAddress);
-  wire->write(reg_addr);  // set register for read
-  wire->endTransmission(false); // false to not release the line
-  wire->beginTransmission(_slaveAddress);
-  wire->requestFrom(_slaveAddress, buff_sz);
-  count = wire->readBytes(buff, buff_sz);
+  _wire->beginTransmission(_slaveAddress);
+  _wire->write(reg_addr);  // set register for read
+  _wire->endTransmission(false); // false to not release the line
+  _wire->beginTransmission(_slaveAddress);
+  _wire->requestFrom(_slaveAddress, buff_sz);
+
+  count = _wire->readBytes(buff, buff_sz);
   if (count != size) { return false; }
 
   return true;
@@ -486,12 +483,12 @@ bool STUSB4500::wireWrite(
   uint8_t buff_sz  = (uint8_t)(size & 0xFF);
   uint8_t result;
 
-  TwoWire *wire = (TwoWire *)_wire;
+  //TwoWire *wire = (TwoWire *)_wire;
 
-  wire->beginTransmission(_slaveAddress);
-  wire->write(reg_addr); // command byte, sets register pointer address
-  wire->write(buff, buff_sz);
-  result = wire->endTransmission();
+  _wire->beginTransmission(_slaveAddress);
+  _wire->write(reg_addr); // command byte, sets register pointer address
+  _wire->write(buff, buff_sz);
+  result = _wire->endTransmission();
   if (result > 0U) { return false; }
 
   return true;
