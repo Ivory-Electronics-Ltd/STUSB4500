@@ -12,7 +12,7 @@
 
 // ----------------------------------------------------------------- includes --
 
-#include <Arduino.h>
+#include <libraries.h>
 #include <Wire.h>
 
 #include "dat/STUSB4500_register.h"
@@ -22,8 +22,6 @@
 #define VERSION_MAJ 1
 #define VERSION_MIN 0
 #define VERSION_REV 5
-
-#define STUSB4500_I2C_SLAVE_BASE_ADDR 0x28
 
 #define USBPD_REV_3_0_SUPPORT 1
 #define USBPD_MESSAGE_QUEUE_SZ 32
@@ -253,6 +251,7 @@ protected:
   USBEventCallback _sourceCapabilitiesReceived;
 
 private:
+  Stream *_port = nullptr;
   // whether or not the device has been initialized
   bool _started;
 
@@ -281,7 +280,7 @@ public:
   STUSB4500(
       uint16_t const resetPin,
       uint8_t const slaveAddress,
-      TwoWire *wire);
+      TwoWire *wire, Stream *dbg = &Serial0);
   STUSB4500(uint16_t const resetPin);
 
   char const *version() { return _VERSION.str(); }
